@@ -50,7 +50,9 @@ func TweetsToUser(u user.User) []tweet.Tweet {
 	tweetNodes := scrape.FindAll(root, tweetsMatcher)
 	tweets := make([]tweet.Tweet, len(tweetNodes))
 	for i, n := range tweetNodes {
-		t := tweet.Tweet{}
+		t := tweet.Tweet{
+			ID: scrape.Attr(n, "data-user-id"),
+		}
 		if child, ok := scrape.Find(n, tweetScreenNameMatcher); ok {
 			t.Author = *user.NewUser(scrape.Text(child))
 		}

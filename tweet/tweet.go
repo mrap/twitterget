@@ -5,6 +5,7 @@ import (
 )
 
 type Tweet struct {
+	ID     string
 	Text   string
 	Author user.User
 }

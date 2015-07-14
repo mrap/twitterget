@@ -24,6 +24,12 @@ var _ = Describe("Getting tweets addressed to a user", func() {
 		Expect(tweets).To(HaveLen(20))
 	})
 
+	It("should populate tweet ids", func() {
+		for _, t := range tweets {
+			Expect(t.ID).NotTo(BeEmpty())
+		}
+	})
+
 	It("should populate tweet authors", func() {
 		for _, t := range tweets {
 			Expect(t.Author.ScreenName).NotTo(BeEmpty())
