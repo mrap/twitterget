@@ -25,31 +25,39 @@ func init() {
 	SearchURL.Path = "search"
 }
 
-func TweetsToUser(username string) []tweet.Tweet {
-	u := SearchURL
-	_url.SetQueryParams(&u, map[string]string{
-		"q": "to:" + user.ToUsername(username),
+func TweetsToUser(u user.User) []tweet.Tweet {
+	reqURL := SearchURL
+	_url.SetQueryParams(&reqURL, map[string]string{
+		"q": "to:" + u.ScreenName,
 		"f": "tweets",
 	})
 
-	res, err := http.Get(u.String())
+	res, err := http.Get(reqURL.String())
 	PanicIf(err)
 	root, err := html.Parse(res.Body)
 	PanicIf(err)
 
-	matcher := func(n *html.Node) bool {
-		if n.DataAtom == atom.P {
-			return strings.HasSuffix(scrape.Attr(n, "class"), "tweet-text")
-		}
-		return false
+	tweetsMatcher := func(n *html.Node) bool {
+		return n.DataAtom == atom.Div && strings.HasPrefix(scrape.Attr(n, "class"), "tweet original-tweet")
+	}
+	tweetScreenNameMatcher := func(n *html.Node) bool {
+		return n.DataAtom == atom.Span && strings.HasPrefix(scrape.Attr(n, "class"), "username")
+	}
+	tweetTextMatcher := func(n *html.Node) bool {
+		return n.DataAtom == atom.P && strings.HasSuffix(scrape.Attr(n, "class"), "tweet-text")
 	}
 
-	tweetNodes := scrape.FindAll(root, matcher)
+	tweetNodes := scrape.FindAll(root, tweetsMatcher)
 	tweets := make([]tweet.Tweet, len(tweetNodes))
 	for i, n := range tweetNodes {
-		tweets[i] = tweet.Tweet{
-			scrape.Text(n),
+		t := tweet.Tweet{}
+		if child, ok := scrape.Find(n, tweetScreenNameMatcher); ok {
+			t.Author = *user.NewUser(scrape.Text(child))
 		}
+		if child, ok := scrape.Find(n, tweetTextMatcher); ok {
+			t.Text = scrape.Text(child)
+		}
+		tweets[i] = t
 	}
 
 	return tweets

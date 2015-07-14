@@ -1,11 +1,23 @@
 package user
 
-import "strings"
+type User struct {
+	ScreenName string
+}
 
-func ToUsername(username string) string {
-	if strings.HasPrefix(username, "@") {
-		return username
-	} else {
-		return "@" + username
+func NewUser(screenName string) *User {
+	return &User{
+		ScreenName: PlainScreenName(screenName),
 	}
+}
+
+func PlainScreenName(name string) string {
+	for i, c := range name {
+		switch string(c) {
+		case "@", " ":
+			continue
+		default:
+			return name[i:len(name)]
+		}
+	}
+	return ""
 }
