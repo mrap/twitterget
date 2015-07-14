@@ -13,18 +13,12 @@ type AuthConfig struct {
 	AccessTokenSecret string
 }
 
-var MainAuthConfig *AuthConfig
-
-func init() {
-	MainAuthConfig = LoadAuthConfig()
-}
-
-func LoadAuthConfig() *AuthConfig {
-	viper.SetConfigName("secrets")
+func LoadAuthConfig(name string) *AuthConfig {
+	viper.SetConfigName(name)
 	viper.AddConfigPath("../")
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatalln("Could not load auth config! You need a secrets.json file!")
+		log.Fatalln("Could not load auth config! Could not find file named:", name)
 		return nil
 	}
 	return &AuthConfig{
