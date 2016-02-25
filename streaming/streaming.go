@@ -6,7 +6,7 @@ import (
 	"github.com/ChimeraCoder/anaconda"
 )
 
-func StartUserStream(api *anaconda.TwitterApi) anaconda.Stream {
+func StartUserStream(api *anaconda.TwitterApi) *anaconda.Stream {
 	v := url.Values{}
 	v.Set("with", "user")
 	v.Set("replies", "all")
